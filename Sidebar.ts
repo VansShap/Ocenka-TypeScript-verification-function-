@@ -8,7 +8,6 @@ const SidebarFields: string[] = ["text", "content"];
 const SidebarContentFields: string[] = ["text", "action", "tabName"];
 
 function validateSidebarValue(value): boolean {
-    console.log("validateSidebarValue");
     if (!isObject(value))
         return false;
     if (!validateObjectKeyFields(value, ConfigSidebar))
@@ -39,12 +38,10 @@ function validateSidebarValue(value): boolean {
 }
 
 function validateValuesOfSidebarObject(object): boolean {
-    console.log("validateValuesOfSidebarObject");
     return isString(object["text"]) && validateValuesOfSidebarContentObject(object["content"]);
 }
 
 function validateValuesOfSidebarContentObject(array): boolean {
-    console.log("validateValuesOfSidebarContentObject");
     if (!isArray(array) || array.length == 0)
         return false;
 
@@ -55,8 +52,6 @@ function validateValuesOfSidebarContentObject(array): boolean {
         let object = array[i];
 
         isValidKeyField = validateObjectKeyFields(object, SidebarContentFields);
-
-        console.log(object + " is " + isValidKeyField);
 
         if (!isValidKeyField)
             return false;

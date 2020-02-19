@@ -4,7 +4,6 @@ import {isArray} from "./Utils";
 const HeaderFields: string[] = ["header_name", "header_tag"];
 
 function validateHeaderValue(value): boolean {
-    console.log("validateHeaderValue");
     if (!isArray(value) || value.length == 0)
         return false;
 
@@ -15,8 +14,6 @@ function validateHeaderValue(value): boolean {
         let object = value[i];
 
         isValidKeyField = validateObjectKeyFields(object, HeaderFields);
-
-        console.log(object + " is " + isValidKeyField);
 
         if (!isValidKeyField)
             return false;

@@ -188,5 +188,3 @@ if (isValid == true) {
 else {
     console.log("Config file isn't valid!");
 }
-
-//tsc --outFile app.js App.ts ValidateFunction.ts --lib es2017

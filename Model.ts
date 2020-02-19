@@ -12,7 +12,6 @@ const ModelLayoutFields: string[] = ["all", "view"];
 const ModelAdditionalLayoutFields: string[] = ["add", "edit"];
 
 function validateModelValue(value): boolean {
-    console.log("validateModelValue");
     if (!isObject(value))
         return false;
     if (!validateObjectKeyFields(value, ConfigModel))
@@ -40,26 +39,26 @@ function validateModelValue(value): boolean {
 }
 
 function validateValuesOfModelObject(object): boolean {
-    console.log("validateValuesOfModelObject");
     let isValidName: boolean = isString(object["name"]);
     let isValidTitle: boolean = isString(object["title"]);
-    let isValidColumns: boolean = validateValuesOfModelColumnsObject(object["columns"]);
+    let isValidColumns: boolean = validateValueOfColumnsField(object["columns"]);
     let isValidLayouts: boolean;
     if (isValidColumns)
-        isValidLayouts = validateValuesOfModelLayoutObject(object["layouts"], getNamesFromColumns(object["columns"]));
+        isValidLayouts = validateValueOfLayoutField(object["layouts"], getNamesFromColumns(object["columns"]));
     let isValidCommands: boolean = true;
     let isValidTasks: boolean = true;
 
     if (object["commands"] != undefined)
-        isValidCommands = validateValuesOfModelCommandsObject(object["commands"]);
+        isValidCommands = validateValueOfCommandsField(object["commands"]);
     if (object["tasks"] != undefined)
-        isValidTasks = validateValuesOfModelTasksObject(object["tasks"]);
+        isValidTasks = validateValueOfTasksField(object["tasks"]);
 
     return isValidName && isValidTitle && isValidColumns && isValidLayouts && isValidCommands && isValidTasks;
 }
 
+//get array of Columns "names"
 function getNamesFromColumns(array): string[] {
-    let arrNames: string[];
+    let arrNames: string[] = [];
 
     for (let i = 0; i < array.length; i++) {
         let object = array[i];
@@ -68,53 +67,8 @@ function getNamesFromColumns(array): string[] {
     return arrNames;
 }
 
-function validateValuesOfModelLayoutObject(object, arrStr: string[]): boolean {
-    console.log("validateValuesOfModelLayoutObject");
-    if (!isObject(object))
-        return false;
-
-    let isValidKeyField: boolean = false;
-    let isValidValueField : boolean = false;
-
-    isValidKeyField = validateObjectKeyFields(object, ModelLayoutFields, ModelAdditionalFields);
-
-    console.log(object + " is " + isValidKeyField);
-
-    if (!isValidKeyField)
-        return false;
-
-    isValidValueField = validateValuesOfModelLayoutFields(object, arrStr);
-
-    if (!isValidValueField)
-        return false;
-
-    return true;
-}
-
-function validateValuesOfModelLayoutFields(object, arrStr: string[]): boolean {
-
-    for (let key in object) {
-        if (!isStringArray(object[key], arrStr))
-            return false;
-    }
-}
-
-function isStringArray(array, arrStr: string[]):boolean {
-    console.log("isStringArray");
-    if (!isArray(array))
-        return false;
-
-    console.log("Array: " + array);
-    for (let i = 0; i < array.length; i++) {
-        let field: number = arrStr.indexOf(array[i]);
-        if (field != -1)
-            return false;
-    }
-    return true;
-}
-
-function validateValuesOfModelColumnsObject(array): boolean {
-    console.log("validateValuesOfModelColumnsObject");
+//check "columns" field value
+function validateValueOfColumnsField(array): boolean {
     if (!isArray(array) || array.length == 0)
         return false;
 
@@ -124,9 +78,7 @@ function validateValuesOfModelColumnsObject(array): boolean {
     for (let i = 0; i < array.length; i++) {
         let object = array[i];
 
-        isValidKeyField = validateValuesOfModelColumnsKeys(object, ModelColumnFields);
-
-        console.log(object + " is " + isValidKeyField);
+        isValidKeyField = validateKeysOfColumnsValue(object, ModelColumnFields);
 
         if (!isValidKeyField)
             return false;
@@ -139,13 +91,14 @@ function validateValuesOfModelColumnsObject(array): boolean {
     return true;
 }
 
-function validateValuesOfModelColumnsKeys(object, arrKeyFields: string[]): boolean {
-    console.log("validateValuesOfModelColumnsKeys");
+//check key fields in object is stored by field "columns"
+function validateKeysOfColumnsValue(object, arrKeyFields: string[]): boolean {
     if (!isObject(object))
         return false;
 
     let counter: number = 0;
     let keys: string[] = Object.keys(object);
+    let keyFieldsArrayLength: number = arrKeyFields.length;
 
     if (keys.indexOf("model") != -1) {
         let type: string = object["type"];
@@ -154,16 +107,17 @@ function validateValuesOfModelColumnsKeys(object, arrKeyFields: string[]): boole
             return false;
         }
     }
+    else {
+        keyFieldsArrayLength--;
+    }
 
-    console.log("Array of keys: " + keys);
     for (let i = 0; i < keys.length; i++) {
         let field: number = arrKeyFields.indexOf(keys[i]);
         if (field != -1)
             counter++;
     }
-    console.log("KEY FIELDS ARRAY LENGTH: " + arrKeyFields.length + "  OBJECT KEYS LENGTH: " + keys.length + " COUNTER: " + counter);
 
-    if ( counter == keys.length && counter == arrKeyFields.length) {
+    if ( counter == keys.length && counter == keyFieldsArrayLength) {
         return true;
     }
     else {
@@ -171,11 +125,56 @@ function validateValuesOfModelColumnsKeys(object, arrKeyFields: string[]): boole
     }
 }
 
-function validateValuesOfModelCommandsObject(object): boolean {
+//check "layouts" field value
+function validateValueOfLayoutField(object, arrStr: string[]): boolean {
+    if (!isObject(object))
+        return false;
+
+    let isValidKeyField: boolean = false;
+    let isValidValueField : boolean = false;
+
+    isValidKeyField = validateObjectKeyFields(object, ModelLayoutFields, ModelAdditionalLayoutFields);
+
+    if (!isValidKeyField)
+        return false;
+
+    isValidValueField = validateValuesOfLayoutObject(object, arrStr);
+
+    if (!isValidValueField)
+        return false;
+
     return true;
 }
 
-function validateValuesOfModelTasksObject(object): boolean {
+//check values are stored in "layouts" fields (all, view, add, edit)
+function validateValuesOfLayoutObject(object, arrStr: string[]): boolean {
+    for (let key in object) {
+        if (!isStringArray(object[key], arrStr))
+            return false;
+    }
+    return true;
+}
+
+//check strings are stored in fields "all, view, add, edit"
+function isStringArray(array, arrStr: string[]):boolean {
+    if (!isArray(array) || array.length == 0)
+        return false;
+
+    for (let i = 0; i < array.length; i++) {
+        let field: number = arrStr.indexOf(array[i]);
+        if (field == -1)
+            return false;
+    }
+    return true;
+}
+
+//check "commands" field value
+function validateValueOfCommandsField(object): boolean {
+    return true;
+}
+
+//check "tasks" field value
+function validateValueOfTasksField(object): boolean {
     return true;
 }
 

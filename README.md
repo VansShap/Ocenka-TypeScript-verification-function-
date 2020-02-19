@@ -1,0 +1,1 @@
+# Ocenka-TypeScript-verification-function-
